@@ -19,12 +19,12 @@ namespace UnityEngine.UI.Extensions
 
         public Vector3[] canvasSpaces;
 
-        private Quaternion prevRotation;
 
         private void Awake()
         {
 
-            canvas = GetComponentInParent<RectTransform>().GetParentCanvas().GetComponent<RectTransform>();
+            //canvas = GetComponentInParent<RectTransform>().GetParentCanvas().GetComponent<RectTransform>();
+            canvas = GetComponent<RectTransform>();
             rt = GetComponent<RectTransform>();
             lr = GetComponent<UILineRenderer>();
         }
@@ -32,14 +32,13 @@ namespace UnityEngine.UI.Extensions
         // Update is called once per frame
         void Update()
         {
-            if (transformsFromTo == null || transformsFromTo.Length < 1)
+            if (transformsFromTo == null || transformsFromTo.Length < 2)
             {
                 return;
             }
             //Performance check to only redraw when the child transforms move 
             //or if this transform rotation changed
-            if (previousPositions != null && previousPositions.Length == transformsFromTo.Length
-                && prevRotation == transform.rotation)
+            if (previousPositions != null && previousPositions.Length == transformsFromTo.Length)
             {
                 bool updateLine = false;
                 for (int i = 0; i < transformsFromTo.Length; i++)
@@ -51,7 +50,6 @@ namespace UnityEngine.UI.Extensions
                 }
                 if (!updateLine) return;
             }
-            prevRotation = transform.rotation;
 
             // Get the pivot points
             Vector2 thisPivot = rt.pivot;
@@ -83,8 +81,10 @@ namespace UnityEngine.UI.Extensions
             positionsBezier[0] = canvasSpaces[0]; //start
             positionsBezier[3] = canvasSpaces[1]; //end 
 
-            positionsBezier[1] = new Vector3(transformsFromTo[1].anchoredPosition.x, transformsFromTo[0].anchoredPosition.y, 0);
-            positionsBezier[2] = new Vector3(transformsFromTo[0].anchoredPosition.x, transformsFromTo[1].anchoredPosition.y, 0);
+            //positionsBezier[1] = new Vector3(transformsFromTo[1].anchoredPosition.x, transformsFromTo[0].anchoredPosition.y, 0);
+            //positionsBezier[2] = new Vector3(transformsFromTo[0].anchoredPosition.x, transformsFromTo[1].anchoredPosition.y, 0);
+            positionsBezier[1] = new Vector3(positionsBezier[3].x, positionsBezier[0].y, 0);
+            positionsBezier[2] = new Vector3(positionsBezier[0].x, positionsBezier[3].y, 0);
 
 
 
