@@ -11,44 +11,41 @@ public class UITechnologyElement : MonoBehaviour, IPointerClickHandler
     [SerializeField] private Image bg;
     [SerializeField] private TextMeshProUGUI techTitle;
     [SerializeField] private TextMeshProUGUI techDescr;
-    [SerializeField] private Color defaultTech;
-    [SerializeField] private Color enabledTech;
-    [SerializeField] private Color completedTech;
 
-    private Technology tech;
+    public Technology Tech { get; private set; }
 
     public static event Action<TechnologyID> OnUITechnologyClick = delegate { };
 
 
     private void Awake() {
-        TechnologyTree.OnTechStatusChange += UpdateStatus;
+        TechnologyTree_Controller.OnTechStatusChange += UpdateStatus;
     }
 
     private void OnDestroy() {
-        TechnologyTree.OnTechStatusChange -= UpdateStatus;
+        TechnologyTree_Controller.OnTechStatusChange -= UpdateStatus;
     }
 
 
 
     public void OnPointerClick(PointerEventData eventData) {
-        OnUITechnologyClick(tech.ID);
-        Setup(tech);
+        OnUITechnologyClick(Tech.ID);
+        Setup(Tech);
     }
 
     public void Setup(Technology t) {
-        tech = t;
+        Tech = t;
         techTitle.text = t.ID.ToString();
         techDescr.text = t.Description;
         SetStatus();
     }
 
     void UpdateStatus(TechnologyID id, TechnologyStatus status) {
-        if (id != tech.ID) return;
+        if (id != Tech.ID) return;
         SetStatus();
     }
 
     void SetStatus() {
-        bg.color = tech.Status == TechnologyStatus.Enabled ? enabledTech : (tech.Status == TechnologyStatus.Completed ? completedTech : defaultTech);
+        bg.color = Tech.Status == TechnologyStatus.Enabled ? Color.white : (Tech.Status == TechnologyStatus.Completed ? Color.green : Color.red);
     }
          
 }
