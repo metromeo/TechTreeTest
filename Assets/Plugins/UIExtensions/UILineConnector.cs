@@ -10,15 +10,19 @@ namespace UnityEngine.UI.Extensions
     {
 
         // The elements between which line segments should be drawn
+        public bool manualBezierPoints;
         public RectTransform[] transformsFromTo;
+        [SerializeField] private RectTransform[] bezierPoints;
         [SerializeField] private Vector3[] positionsBezier;
         [SerializeField] private Vector2[] previousPositions;
         [SerializeField] private RectTransform canvas;
         [SerializeField] private RectTransform rt;
         [SerializeField] private UILineRenderer lr;
 
-        public Vector3[] canvasSpaces;
 
+        public Vector3[] canvasSpaces;
+        Vector2 thisPivot;
+        Vector2 canvasPivot;
 
         private void Awake()
         {
@@ -32,16 +36,40 @@ namespace UnityEngine.UI.Extensions
             transformsFromTo = new RectTransform[2] { from, to };
 
             // Get the pivot points
-            Vector2 thisPivot = rt.pivot;
-            Vector2 canvasPivot = canvas.pivot;
+            thisPivot = rt.pivot;
+            canvasPivot = canvas.pivot;
+
+
+            CheckAndRecalcPositions();
+        }
+
+        public void CheckAndRecalcPositions() {
+            positionsBezier = new Vector3[4];
+
+            if (!manualBezierPoints) {
+                // установить позиции для промежуточных точек безье в зависимости от позиций источника и цели
+                // разница между X и Y
+                float diffX = transformsFromTo[1].position.x - transformsFromTo[0].position.x;
+                float diffY = transformsFromTo[1].position.y - transformsFromTo[0].position.y;
+                if (Mathf.Abs(diffX) >= Mathf.Abs(diffY)) {
+                    bezierPoints[0].position = new Vector3(transformsFromTo[0].position.x + diffX / 2, transformsFromTo[0].position.y, 0);
+                    bezierPoints[1].position = new Vector3(transformsFromTo[0].position.x + diffX / 2, transformsFromTo[1].position.y, 0);
+                }
+                else {
+                    bezierPoints[0].position = new Vector3(transformsFromTo[0].position.x, transformsFromTo[0].position.y + diffY / 2, 0);
+                    bezierPoints[1].position = new Vector3(transformsFromTo[1].position.x, transformsFromTo[0].position.y + diffY / 2, 0);
+                }
+            }
 
 
 
             // Set up some arrays of coordinates in various reference systems
-            positionsBezier = new Vector3[4];
-
             Vector3[] worldSpaces = new Vector3[transformsFromTo.Length];
             canvasSpaces = new Vector3[transformsFromTo.Length];
+
+            Vector3[] worldSpacesB = new Vector3[bezierPoints.Length];
+            Vector3[] canvasSpacesB = new Vector3[bezierPoints.Length];
+
             Vector2[] points = new Vector2[positionsBezier.Length];
 
             // First, convert the pivot to worldspace
@@ -54,6 +82,15 @@ namespace UnityEngine.UI.Extensions
                 canvasSpaces[i] = canvas.InverseTransformPoint(worldSpaces[i]);
             }
 
+            for (int i = 0; i < bezierPoints.Length; i++) {
+                worldSpacesB[i] = bezierPoints[i].TransformPoint(thisPivot);
+            }
+
+            // Then, convert to canvas space
+            for (int i = 0; i < transformsFromTo.Length; i++) {
+                canvasSpacesB[i] = canvas.InverseTransformPoint(worldSpacesB[i]);
+            }
+
             // Add bezier points
             positionsBezier = new Vector3[4];
             positionsBezier[0] = canvasSpaces[0]; //start
@@ -61,8 +98,10 @@ namespace UnityEngine.UI.Extensions
 
             //positionsBezier[1] = new Vector3(transformsFromTo[1].anchoredPosition.x, transformsFromTo[0].anchoredPosition.y, 0);
             //positionsBezier[2] = new Vector3(transformsFromTo[0].anchoredPosition.x, transformsFromTo[1].anchoredPosition.y, 0);
-            positionsBezier[1] = new Vector3(positionsBezier[3].x, positionsBezier[0].y, 0);
-            positionsBezier[2] = new Vector3(positionsBezier[0].x, positionsBezier[3].y, 0);
+            //bezierPoints[0].position = new Vector3(positionsBezier[3].x, positionsBezier[0].y, 0);
+            //bezierPoints[1].position = new Vector3(positionsBezier[0].x, positionsBezier[3].y, 0);
+            positionsBezier[1] = canvasSpacesB[0];
+            positionsBezier[2] = canvasSpacesB[1];
 
 
 

@@ -3,11 +3,14 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI.Extensions;
 
+[System.Serializable]
 public class UITechnologyConnection : MonoBehaviour
 {
     [SerializeField] private UILineConnector line;
-    public TechnologyID TechOrigin { get; private set; }
-
+    [SerializeField] private TechnologyID sourceID;
+    [SerializeField] private TechnologyID targetID;
+    RectTransform source;
+    RectTransform target;
 
     private void Awake() {
         TechnologyTree_Controller.OnTechStatusChange += UpdateStatus;
@@ -17,16 +20,31 @@ public class UITechnologyConnection : MonoBehaviour
         TechnologyTree_Controller.OnTechStatusChange -= UpdateStatus;
     }
 
-    public void Setup(UITechnologyElement origin, RectTransform destination) {
-        TechOrigin = origin.Tech.ID;
-        line.Setup(origin.GetComponent<RectTransform>(), destination);
-        UpdateStatus(TechOrigin, origin.Tech.Status);
+    public void Setup(TechnologyID _sourceID, TechnologyID _targetID, RectTransform source, RectTransform target) {
+        transform.position = source.position;
+        sourceID = _sourceID;
+        targetID = _targetID;
+        this.source = source;
+        this.target = target;
+        line.Setup(source, target);
+        
+        //UpdateStatus(TechOrigin, origin.TechID.Status);
+    }
+
+    public void UpdateLinePositions() {
+        line.CheckAndRecalcPositions();
+        //transform.position = source.position;
     }
 
     void UpdateStatus(TechnologyID id, TechnologyStatus status) {
-        if (id != TechOrigin) return;
+        if (id != sourceID) return;
         line.SetLineColor(status == TechnologyStatus.Enabled ? Color.white : (status == TechnologyStatus.Completed ? Color.green : Color.red));
     }
 
-    
+    public UILineConnector GetLine() => line;
+    public TechnologyID GetSource() => sourceID;
+    public TechnologyID GetTarget() => targetID;
+
+
+
 }

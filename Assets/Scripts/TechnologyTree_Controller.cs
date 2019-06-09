@@ -24,7 +24,7 @@ public class TechnologyTree_Controller : MonoBehaviour
     }
 
     public void AddTechnologies(Technology[] techs, byte[,] behs) {
-        data.SetUpTechs(techs);
+        //data.SetUpTechs(techs);
         data.SetUpBehaviours(behs);
         OnTechTreeCreated(techs);
     }
