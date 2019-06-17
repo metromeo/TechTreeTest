@@ -1,4 +1,9 @@
-﻿using System.Collections;
+﻿/* Содержит в себе позицию технологии на канвасе и сам UI объект
+ * 
+ * 
+ * */
+
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -6,7 +11,6 @@ using UnityEngine;
 public class TechnologyOnCanvas 
 {
     [SerializeField] private TechnologyID id;
-    //[SerializeField] private Vector2 position;
     [SerializeField] private GameObject uiElementObject;
     [SerializeField] private UITechnologyElement uiElement;
 
@@ -20,13 +24,5 @@ public class TechnologyOnCanvas
 
     public TechnologyID GetID() => id;
     public UITechnologyElement GetUIElement() => uiElement;
-
-    //public Vector2 GetPosition() => position;
-
-    //public void CheckPosition() {
-    //    if (uiElement.transform.localPosition != position) {
-    //        position = uiElement
-    //    }
-    //}
 
 }

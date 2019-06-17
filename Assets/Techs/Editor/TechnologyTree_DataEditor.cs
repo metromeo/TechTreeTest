@@ -1,4 +1,11 @@
-﻿using System.Collections;
+﻿/* Редактор технологий 
+ * рисует кнопки для добавления/удаления технологий
+ * для обновления параметров, добавления/удаления детей, сортировки
+ * 
+ * 
+ * */
+
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;

@@ -1,4 +1,9 @@
-﻿using System.Collections;
+﻿/* Отрисовывает дерево технологий, в Edit mode
+ * 
+ * 
+ * */
+
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
@@ -9,7 +14,7 @@ public class TechnologyTree_Drawer : MonoBehaviour {
     [SerializeField]
     private TechnologyTree_Data ttData;
     public TechnologyTree_Data TTData { get { return ttData; } }
-    //[HideInInspector]
+    [HideInInspector]
     [SerializeField]
     private List<TechnologyOnCanvas> technologiesOnCanvas;
     [SerializeField]
@@ -28,13 +33,19 @@ public class TechnologyTree_Drawer : MonoBehaviour {
     private void Awake() {
         if (technologiesOnCanvas == null) technologiesOnCanvas = new List<TechnologyOnCanvas>();
         if (uiConnections == null) uiConnections = new List<UITechnologyConnection>();
-        if (Application.isPlaying) {
+
+        // на старте обновить параметры технологий
+        //if (Application.isPlaying) {
             UpdateTechParams();
-            this.enabled = false;
-        }
+            //this.enabled = false;
+        //}
     }
 
     private void Update() {
+        if (Application.isPlaying) {
+            return;
+        }
+
         // проверять были ли сдвинуты технологии и если да, двигать линии
         foreach (UITechnologyConnection c in uiConnections) {
             if (c.GetLine() == null) continue;
@@ -46,19 +57,25 @@ public class TechnologyTree_Drawer : MonoBehaviour {
         }
     }
 
+    /// <summary>
+    /// Отрисовать не отрисованные технологии, отрисованным обновить параметры
+    /// </summary>
     public void InstantiateUpdateTechsOnCanvas() {
-        technologiesOnCanvas.ForEach(t => DestroyImmediate(t.GetUIElement().gameObject));
-        technologiesOnCanvas.Clear();
 
         foreach (Technology t in ttData.GetTechnologies()) {
-            GameObject tmp;
-            tmp = PrefabUtility.InstantiatePrefab(uiElementPrefab, uiElementsRoot) as GameObject;
-            TechnologyOnCanvas toc = new TechnologyOnCanvas(t.ID, tmp, tmp.GetComponent<UITechnologyElement>());
-            technologiesOnCanvas.Add(toc);
+            //отрисовать технологию, если такая не отрисована (будет создана в центре, позицию надо выставить вручную
+            if (GetTechOfCanvasByID(t.ID) == null) {
+                GameObject tmp = PrefabUtility.InstantiatePrefab(uiElementPrefab, uiElementsRoot) as GameObject;
+                TechnologyOnCanvas toc = new TechnologyOnCanvas(t.ID, tmp, tmp.GetComponent<UITechnologyElement>());
+                technologiesOnCanvas.Add(toc);
+            }
         }
         UpdateTechParams();
     }
 
+    /// <summary>
+    /// Обновить параметры технологии на канвасе
+    /// </summary>
     public void UpdateTechParams() {
         foreach (Technology t in ttData.GetTechnologies()) {
             UITechnologyElement uit = GetTechOfCanvasByID(t.ID).GetUIElement();
@@ -73,14 +90,11 @@ public class TechnologyTree_Drawer : MonoBehaviour {
         }
     }
 
-    //bool IsTechAlreadyOnCanvas(TechnologyID id) {
-    //    bool res = false;
-    //    foreach (TechnologyOnCanvas t in technologiesOnCanvas) {
-    //        if (t.GetID() == id) res = true;
-    //    }
-    //    return res;
-    //}
-
+    /// <summary>
+    /// Найти технологию на канвасе по ID
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
     TechnologyOnCanvas GetTechOfCanvasByID(TechnologyID id) {
         TechnologyOnCanvas res = null;
         foreach (TechnologyOnCanvas t in technologiesOnCanvas) {
@@ -90,13 +104,20 @@ public class TechnologyTree_Drawer : MonoBehaviour {
     }
 
 
+    /// <summary>
+    /// Возвращает цвет бэка технологии по статусу
+    /// </summary>
+    /// <param name="s"></param>
+    /// <returns></returns>
     Color GetColorByStatus(TechnologyStatus s) {
         return s == TechnologyStatus.Disabled ? colorDisabled : (s == TechnologyStatus.Enabled ? colorEnabled : colorCompleted);
     }
 
+
+    /// <summary>
+    /// Перестроить соединения
+    /// </summary>
     public void InstantiateUpdateConnections() {
-        uiConnections.ForEach( t => DestroyImmediate(t.gameObject));
-        uiConnections.Clear();
 
         foreach (TechnologyOnCanvas toc in technologiesOnCanvas) {
             Technology t = ttData.GetTechnologyByID(toc.GetID());
@@ -106,31 +127,22 @@ public class TechnologyTree_Drawer : MonoBehaviour {
         }
     }
 
+
+    /// <summary>
+    /// Создать соединение между двумя технологиями, если такое не существует
+    /// </summary>
+    /// <param name="source"></param>
+    /// <param name="target"></param>
     void CreateConnection(TechnologyOnCanvas source, TechnologyOnCanvas target) {
+        //Проверить, есть ли соединение, если да, ничего не делать
+        foreach (UITechnologyConnection u in uiConnections) {
+            if (u.GetSource() == source.GetID() && u.GetTarget() == target.GetID()) {
+                return;
+            }
+        }
+
         //сначала найти ближайший к центру source якорь на target
         RectTransform[] anchors = GetClosestAnchorsBTWTechs(source, target);
-
-        //float minDist = float.MaxValue;
-        //int anchorOnTargetID = -1;
-        //for(int i = 0; i < target.GetUIElement().Anchors.Length; i++){
-        //    float dist = Vector2.Distance(source.GetUIElement().transform.position, target.GetUIElement().Anchors[i].position);
-        //    if (dist < minDist) {
-        //        minDist = dist;
-        //        anchorOnTargetID = i;
-        //    }
-        //}
-        //Transform anchorTarget = target.GetUIElement().Anchors[anchorOnTargetID];
-        // тоже самое, но от найденного якоря на target ко всем якорям в source
-        //minDist = float.MaxValue;
-        //int anchorOnSourceID = -1;
-        //for (int i = 0; i < source.GetUIElement().Anchors.Length; i++) {
-        //    float dist = Vector2.Distance(anchorTarget.position, source.GetUIElement().Anchors[i].position);
-        //    if (dist < minDist) {
-        //        minDist = dist;
-        //        anchorOnSourceID = i;
-        //    }
-        //}
-        //Transform anchorsource = source.GetUIElement().Anchors[anchorOnSourceID];
 
         // построить линию между двумя точками
         UITechnologyConnection connection = Instantiate(uiConnectionPrefab, uiElementsRoot);
@@ -138,10 +150,15 @@ public class TechnologyTree_Drawer : MonoBehaviour {
         connection.name = "_" + source.GetID().ToString() + "_to_" + target.GetID().ToString();
         connection.Setup(source.GetID(), target.GetID(), anchors[0], anchors[1]);
         connection.transform.SetAsFirstSibling();
-        
-
     }
 
+
+    /// <summary>
+    /// Найти ближайшие точки между технологиями (Top, Right, Bottom, Left)
+    /// </summary>
+    /// <param name="source"></param>
+    /// <param name="target"></param>
+    /// <returns></returns>
     RectTransform[] GetClosestAnchorsBTWTechs(TechnologyOnCanvas source, TechnologyOnCanvas target) {
         RectTransform[] res = new RectTransform[2];
         float minDist = float.MaxValue;
@@ -166,46 +183,4 @@ public class TechnologyTree_Drawer : MonoBehaviour {
 
         return res;
     }
-
-
-
-    //[SerializeField] private UITechnologyElement uiTechElementPrefab;
-    //[SerializeField] private UITechnologyConnection uiConnectionPrefab;
-    //[SerializeField] private Transform uiTechsRoot;
-    //[SerializeField] private TechnologyTree_Controller techTreeController;
-
-
-    //private List<UITechnologyElement> uiTechs = new List<UITechnologyElement>();
-    //private List<UITechnologyConnection> uiConnections = new List<UITechnologyConnection>();
-
-
-    //private void Awake() {
-    //    TechnologyTree_Controller.OnTechTreeCreated += DrawTree;
-    //}
-
-    //private void OnDestroy() {
-    //    TechnologyTree_Controller.OnTechTreeCreated -= DrawTree;
-    //}
-
-
-    //void DrawTree(Technology[] techs) {
-    //    foreach (Technology t in techs) {
-    //        UITechnologyElement uit = Instantiate(uiTechElementPrefab, uiTechsRoot);
-    //        uiTechs.Add(uit);
-    //        //uit.transform.localPosition = GetPositionFor(t.Name);
-    //        uit.Setup(t);
-    //    }
-    //    foreach (UITechnologyElement uit in uiTechs) {
-    //        List<TechnologyID> childs = techTreeController.GetChildsOf(uit.Tech.ID);
-    //        foreach (TechnologyID c in childs) {
-    //            UITechnologyConnection line = Instantiate(uiConnectionPrefab, uiTechsRoot);
-    //            uiConnections.Add(line);
-    //            line.Setup(uit, GetTechnologyUIByID(c).GetComponent<RectTransform>());
-    //            line.transform.SetAsFirstSibling();
-    //        }
-    //    }
-    //}
-
-    //UITechnologyElement GetTechnologyUIByID(TechnologyID id) => uiTechs.SingleOrDefault(t => t.Tech.ID == id);
-
 }

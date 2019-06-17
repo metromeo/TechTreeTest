@@ -1,4 +1,12 @@
-﻿using System.Collections;
+﻿/*
+ * Содержит инфо о технологии
+ * ID, название, состояние, описание, детей
+ * сюда же надо будет добавить стоимость в очках, прогресс исследования
+ * 
+ * 
+ * */
+
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -47,19 +55,39 @@ public enum TechnologyStatus {
 
 [System.Serializable]
 public class Technology {
+
     [SerializeField] private TechnologyID id;
+    /// <summary>
+    /// ID технологии
+    /// </summary>
     public TechnologyID ID { get { return id; } }
+
+
     [SerializeField] private string name;
+    /// <summary>
+    /// Название технологии
+    /// </summary>
     public string Name { get { return name; } }
+
+
     [SerializeField] private TechnologyStatus status;
+    /// <summary>
+    /// Статус технологии
+    /// </summary>
     public TechnologyStatus Status { get { return status; } }
+
+
     [SerializeField] private string description;
+    /// <summary>
+    /// Описание технологии
+    /// </summary>
     public string Description { get { return description; } }
 
     [SerializeField] private List<TechnologyID> childs;
+    /// <summary>
+    /// Зависимые технологии
+    /// </summary>
     public List<TechnologyID> Childs { get { return childs; } }
-    //[SerializeField] private List<TechnologyID> parents;
-    //public List<TechnologyID> Parents { get { return parents; } }
 
 
     public Technology() {
@@ -81,15 +109,17 @@ public class Technology {
         description = _description;
     }
 
+    /// <summary>
+    /// Установить статус выполнена
+    /// </summary>
     public void SetComplete() {
         status = TechnologyStatus.Completed;
     }
+
+    /// <summary>
+    /// Установить статус доступна
+    /// </summary>
     public void SetEnabled() {
         status = TechnologyStatus.Enabled;
     }
-
-    //public void AddParent(TechnologyID parentID) {
-    //    if (!parents.Contains(parentID)) parents.Add(parentID);
-    //}
-
 }

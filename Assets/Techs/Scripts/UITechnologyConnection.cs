@@ -1,4 +1,9 @@
-﻿using System.Collections;
+﻿/* Отрисовывает соединение
+ * 
+ * 
+ * */
+
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI.Extensions;
@@ -12,14 +17,14 @@ public class UITechnologyConnection : MonoBehaviour
     RectTransform source;
     RectTransform target;
 
-    private void Awake() {
-        TechnologyTree_Controller.OnTechStatusChange += UpdateStatus;
-    }
 
-    private void OnDestroy() {
-        TechnologyTree_Controller.OnTechStatusChange -= UpdateStatus;
-    }
-
+    /// <summary>
+    /// Устанавливает источник и цель и отрисовывает
+    /// </summary>
+    /// <param name="_sourceID"></param>
+    /// <param name="_targetID"></param>
+    /// <param name="source"></param>
+    /// <param name="target"></param>
     public void Setup(TechnologyID _sourceID, TechnologyID _targetID, RectTransform source, RectTransform target) {
         transform.position = source.position;
         sourceID = _sourceID;
@@ -27,18 +32,14 @@ public class UITechnologyConnection : MonoBehaviour
         this.source = source;
         this.target = target;
         line.Setup(source, target);
-        
-        //UpdateStatus(TechOrigin, origin.TechID.Status);
     }
 
+
+    /// <summary>
+    /// Обновляет позиции линии при перемещении технологии на канвасе
+    /// </summary>
     public void UpdateLinePositions() {
         line.CheckAndRecalcPositions();
-        //transform.position = source.position;
-    }
-
-    void UpdateStatus(TechnologyID id, TechnologyStatus status) {
-        if (id != sourceID) return;
-        line.SetLineColor(status == TechnologyStatus.Enabled ? Color.white : (status == TechnologyStatus.Completed ? Color.green : Color.red));
     }
 
     public UILineConnector GetLine() => line;

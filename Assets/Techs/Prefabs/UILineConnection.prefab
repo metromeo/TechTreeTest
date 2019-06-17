@@ -84,7 +84,7 @@ GameObject:
   - component: {fileID: 5639169706162051427}
   - component: {fileID: 5639169706162051426}
   m_Layer: 5
-  m_Name: LineConnection
+  m_Name: UILineConnection
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -132,6 +132,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   line: {fileID: 5639169706162051426}
+  sourceID: 0
+  targetID: 0
 --- !u!114 &5639169706162051427
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -181,6 +183,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8b52ee3a4491f3742bb35fa3eec798d3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  manualBezierPoints: 0
   transformsFromTo: []
   bezierPoints:
   - {fileID: 2066759334383160877}
