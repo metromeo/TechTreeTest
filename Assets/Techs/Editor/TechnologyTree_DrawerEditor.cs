@@ -15,20 +15,9 @@ public class TechnologyTree_DrawerEditor : Editor {
     SerializedProperty technologiesList;
 
 
-    private List<bool> showTechInfo;
-
-
-    private void OnEnable() {
-        showTechInfo = new List<bool>();
-    }
 
     void UpdateTechs() {
         technologiesList = serializedObject.FindProperty("technologiesOnCanvas");
-        if (technologiesList != null && technologiesList.arraySize > showTechInfo.Count) {
-            for (int i = 0; i < technologiesList.arraySize - showTechInfo.Count;) {
-                showTechInfo.Add(false);
-            }
-        }
     }
 
     public override void OnInspectorGUI() {
@@ -37,7 +26,7 @@ public class TechnologyTree_DrawerEditor : Editor {
         UpdateTechs();
         base.OnInspectorGUI();
         DrawControls();
-
+        DrawTechs();
 
         serializedObject.ApplyModifiedProperties();
     }
@@ -59,10 +48,11 @@ public class TechnologyTree_DrawerEditor : Editor {
 
         EditorGUILayout.LabelField("List of technologies on canvas", EditorStyles.whiteBoldLabel);
         for (int i = 0; i < technologiesList.arraySize; i++) {
-            GUI.color = showTechInfo[i] ? Color.cyan : Color.yellow;
             if (GUILayout.Button(((TechnologyID)technologiesList.GetArrayElementAtIndex(i).FindPropertyRelative("id").enumValueIndex).ToString(),
                                 EditorStyles.toolbarButton, new GUILayoutOption[] { GUILayout.Width(150), })) {
-                showTechInfo[i] = !showTechInfo[i];
+                Selection.activeGameObject = technologiesList.GetArrayElementAtIndex(i).FindPropertyRelative("uiElementObject").objectReferenceValue as GameObject;
+                SceneView.FrameLastActiveSceneView();
+
             }
         }
     }

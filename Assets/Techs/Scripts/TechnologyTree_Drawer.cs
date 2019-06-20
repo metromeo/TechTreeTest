@@ -17,7 +17,6 @@ public class TechnologyTree_Drawer : MonoBehaviour {
     [HideInInspector]
     [SerializeField]
     private List<TechnologyOnCanvas> technologiesOnCanvas;
-    [SerializeField]
     private List<UITechnologyConnection> uiConnections = new List<UITechnologyConnection>();
 
     [SerializeField] private GameObject uiElementPrefab;
